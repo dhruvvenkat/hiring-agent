@@ -12,17 +12,22 @@ from models import ModelProvider
 # Load environment variables
 load_dotenv()
 
-# Constants
-DEFAULT_MODEL_NAME = "gemma3:4b"
 DEFAULT_PROVIDER = ModelProvider.OLLAMA
+DEFAULT_MODEL_BY_PROVIDER = {
+    ModelProvider.OLLAMA.value: "gemma3:4b",
+    ModelProvider.GEMINI.value: "gemini-2.5-flash",
+}
 
 # Get model and provider from environment or use defaults
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", DEFAULT_MODEL_NAME)
-PROVIDER = os.getenv("LLM_PROVIDER", DEFAULT_PROVIDER.value)
+PROVIDER = os.getenv("LLM_PROVIDER", DEFAULT_PROVIDER.value).strip().lower()
 
 # Validate provider
 if PROVIDER not in [p.value for p in ModelProvider]:
     PROVIDER = DEFAULT_PROVIDER.value
+
+DEFAULT_MODEL = (
+    os.getenv("DEFAULT_MODEL", "").strip() or DEFAULT_MODEL_BY_PROVIDER[PROVIDER]
+)
 
 # Model-specific parameters
 MODEL_PARAMETERS = {
@@ -62,6 +67,10 @@ MODEL_PROVIDER_MAPPING = {
     "gemini-3.5-flash": ModelProvider.GEMINI,
     "gemini-3.1-flash-lite": ModelProvider.GEMINI,
 }
+
+model_provider = MODEL_PROVIDER_MAPPING.get(DEFAULT_MODEL)
+if model_provider and model_provider.value != PROVIDER:
+    DEFAULT_MODEL = DEFAULT_MODEL_BY_PROVIDER[PROVIDER]
 
 # Get API keys from environment
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

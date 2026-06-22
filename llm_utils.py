@@ -5,7 +5,7 @@ Utility functions for LLM providers.
 import logging
 from typing import Any, Dict, Optional
 from models import ModelProvider, OllamaProvider, GeminiProvider
-from prompt import MODEL_PROVIDER_MAPPING, GEMINI_API_KEY
+from prompt import GEMINI_API_KEY, PROVIDER
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +47,10 @@ def initialize_llm_provider(model_name: str) -> Any:
     Returns:
         An initialized LLM provider (either OllamaProvider or GeminiProvider)
     """
-    # Default to Ollama provider
+    provider_name = ModelProvider(PROVIDER)
     provider = OllamaProvider()
-    # If using Gemini and API key is available, use Gemini provider
-    model_provider = MODEL_PROVIDER_MAPPING.get(model_name, ModelProvider.OLLAMA)
-    if model_provider == ModelProvider.GEMINI:
+
+    if provider_name == ModelProvider.GEMINI:
         if not GEMINI_API_KEY:
             logger.warning("⚠️ Gemini API key not found. Falling back to Ollama.")
         else:
